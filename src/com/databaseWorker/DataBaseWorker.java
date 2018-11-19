@@ -24,20 +24,21 @@ public class DataBaseWorker {
 
     }
 
-    public ErrorEnum Connect(){
+    public void Connect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("Driver loading success!");
 
             this.connection = DriverManager.getConnection(url, username, password);
 
-            return ErrorEnum.Success;
+            //return ErrorEnum.Success;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            return ErrorEnum.ConnectError;
+            //return ErrorEnum.ConnectError;
         }
         catch (SQLException ex) {
-            return ErrorEnum.ConnectError;
+            ex.printStackTrace();
+            //return ErrorEnum.ConnectError;
         }
     }
 
@@ -64,11 +65,12 @@ public class DataBaseWorker {
 
     public ArrayList<DoctorResults> QuerySlectAllDcotors(){
         try {
-            String query = "select FIO, cabinet, tel_num from doctor order by FIO asc;\n";
+            String query = "select * from doctor order by FIO asc;\n";
 
             ArrayList<DoctorResults> resultList = new ArrayList<DoctorResults>();
             Statement stmt = connection.createStatement();
             ResultSet res = stmt.executeQuery(query);
+
 
             while (res.next()) {
                 resultList.add(new DoctorResults(
@@ -100,7 +102,7 @@ public class DataBaseWorker {
         }
     }
 
-    public ErrorEnum InsertToDoctor(int id, String FIO, int cabinet, String tel_num) {
+    public ErrorEnum InsertToDoctor(String FIO, int cabinet, String tel_num) {
         if(FIO.length() > 50) {
             FIO = FIO.substring(0, 50);
         }
@@ -108,20 +110,26 @@ public class DataBaseWorker {
             tel_num = tel_num.substring(0, 10);
         }
         try {
-            String query = "INSERT INTO doctor (id, FIO, cabinet, tel_num)\n" +
-                    "VALUES (" + id + ", " + FIO + ", " + cabinet + ", " + tel_num + ");\n";
 
-            Statement stmt = connection.createStatement();
-            ResultSet res = stmt.executeQuery(query);
+            String query = "INSERT INTO doctor (FIO, cabinet, tel_num) "
+                    +"VALUES (?,?,?)";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setString(1,"qwe");
+            pstmt.setString(2,"2");
+            pstmt.setString(3,"123213");
+            System.out.print(pstmt);
+            //Statement stmt = this.connection.createStatement();
+            pstmt.executeUpdate();
 
             return ErrorEnum.Success;
         }
         catch (SQLException ex) {
+            ex.printStackTrace();
             return ErrorEnum.InsertError;
         }
     }
 
-    public ErrorEnum InsertToOwner(int id, String FIO, String adr, String tel_num, int salq_id) {
+    public ErrorEnum InsertToOwner(String FIO, String adr, String tel_num, int salq_id) {
         if(FIO.length() > 50) {
             FIO = FIO.substring(0, 50);
         }
@@ -133,8 +141,8 @@ public class DataBaseWorker {
         }
         try {
 
-            String query = "INSERT INTO owner (id, FIO, adr, tel_num, salq_id)\n" +
-                    "VALUES (" + id + ", " + FIO + ", " + adr + ", " + tel_num + ", " + salq_id + ");\n";
+            String query = "INSERT INTO owner (FIO, adr, tel_num, salq_id)\n" +
+                    "VALUES (FIO + ',' + adr + ',' + tel_num + ',' + salq_id);";
 
             Statement stmt = connection.createStatement();
             ResultSet res = stmt.executeQuery(query);
